@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discipline Engine</title>
+
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+      <!-- Side Panel Column -->
+      <aside class="w-full lg:w-1/3 flex flex-col gap-4">
+        <!-- Goals Tab -->
+        <button id="open-goals-btn" class="mb-2 w-full bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+          <i class="fas fa-bullseye mr-2"></i>Goals
+        </button>
+        <!-- Calendar & Analytics Button -->
+        <button
+          id="open-analytics-btn"
+          class="mb-2 w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+        >
+          <i class="fas fa-chart-line mr-2"></i>Calendar & Analytics
+        </button>
+        <!-- Long-Term Study Planner Button -->
+        <button
+          id="open-study-planner-btn"
+          class="mb-2 w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+        >
+          <i class="fas fa-calendar-alt mr-2"></i>Long-Term Study Planner
+        </button>
+        <!-- Today's AI Coach -->
+        <div class="bg-gray-900/50 rounded-2xl shadow-lg p-6">
+          <h2 class="text-xl font-bold text-white mb-4">
+            <i class="fas fa-comment-dots mr-2 text-purple-400"></i>AI Coach
+          </h2>
+          <div
+            id="ai-coach-message"
+            class="bg-gray-800 p-4 rounded-lg text-sm text-gray-300 italic min-h-[100px]"
+          >
+            ✨ Connecting to AI...
+          </div>
+        </div>
+
+        <!-- Study Focus -->
+        <div
+          class="bg-gray-900/50 rounded-2xl shadow-lg p-6 flex-grow flex flex-col"
+        >
+          <h2 class="text-xl font-bold text-white mb-4">
+            <i class="fas fa-brain mr-2 text-blue-400"></i>Study Focus
+          </h2>
+          <div
+            id="study-focus-content"
+            class="bg-gray-800 p-4 rounded-lg flex-grow flex flex-col justify-center"
+          >
+            <!-- AI recommendation will go here -->
+          </div>
+          <button
+            id="log-study-btn"
+            class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 hidden"
+          >
+            Log Session Progress
+          </button>
+        </div>
+
+        <!-- Punishment Queue -->
+        <div
+          class="bg-gray-900/50 rounded-2xl shadow-lg p-6 flex-grow flex flex-col"
+        >
+          <h2 class="text-xl font-bold text-white mb-4">
+            <i class="fas fa-fire mr-2 text-red-500"></i>Punishment Queue
+          </h2>
+          <div
+            id="punishment-queue"
+            class="space-y-2 overflow-y-auto flex-grow"
+          >
+            <p class="text-gray-400 italic">
+              No punishments queued. Stay disciplined.
+            </p>
+          </div>
+          <button
+            id="clear-punishments-btn"
+            class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 hidden"
+          >
+            Clear During Sports Break
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Modal for logging study progress -->
+    <div
+      id="study-log-modal"
+      class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50"
+    >
+      <div
+        class="bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-2xl transform transition-all"
+      >
+        <h2 class="text-2xl font-bold text-white mb-2">Log Study Session</h2>
+        <p class="text-gray-400 mb-6">
+          Topic:
+          <span
+            id="modal-topic-title"
+            class="font-semibold text-blue-400"
+          ></span>
+        </p>
+
+        <div
+          id="ai-subtopics-container"
+          class="mb-6 max-h-60 overflow-y-auto p-2 bg-gray-900 rounded-lg"
+        >
+          <p class="text-gray-500 italic">Generating sub-topics...</p>
+        </div>
+
+        <p class="text-center text-gray-400 my-2">OR</p>
+
+        <textarea
+          id="manual-log-input"
+          class="w-full bg-gray-700 text-white rounded-lg p-3 h-24"
+          placeholder="Describe what you accomplished... (NLP will process this)"
+        ></textarea>
+
+        <div class="flex justify-end gap-4 mt-6">
+          <button
+            onclick="closeModal()"
+            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg"
+          >
+            Cancel
+          </button>
+          <button
+            onclick="submitStudyLog()"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
+          >
+            Submit Log
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alarm Sound -->
+    <audio
+      id="alarm-sound"
+      src="https://www.soundjay.com/buttons/sounds/beep-01a.mp3"
+      preload="auto"
+    ></audio>
+
+    <!-- Calendar & Analytics Modal -->
+    <div
+      id="analytics-modal"
+      class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50"
+    >
+      <div
+        class="bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-2xl transform transition-all"
+      >
+        <h2 class="text-2xl font-bold text-white mb-4">Calendar & Analytics</h2>
+        <div class="mb-6">
+          <button
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg mr-2"
+          >
+            Weekly View
+          </button>
+          <button
+            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded-lg"
+          >
+            Monthly View
+          </button>
+        </div>
+        <div class="bg-gray-900 rounded-lg p-4 min-h-[200px] text-gray-300">
+          <p class="italic">
+            Analytics and calendar visualizations will appear here.
+          </p>
+        </div>
+        <div class="flex justify-end gap-4 mt-6">
+          <button
+            id="close-analytics-btn"
+            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg"
+          >
+            Close
+          </button>
+        </div>
+        <div class="mt-8">
+          <h3 class="text-lg font-bold text-white mb-2">
+            Digital Wellbeing Check
+          </h3>
+          <form id="wellbeing-form" class="flex gap-2 items-center">
+            <label class="text-gray-300">Screen time today (minutes):</label>
+            <input
+              type="number"
+              id="wellbeing-screen-time"
+              class="bg-gray-700 text-white rounded-lg p-2 w-24"
+              min="0"
+              required
+            />
+            <button
+              type="submit"
+              class="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-lg"
+            >
+              Check
+            </button>
+          </form>
+          <div id="wellbeing-result" class="mt-2 text-sm"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Long-Term Study Planner Modal -->
+    <div
+      id="study-planner-modal"
+      class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 hidden z-50"
+    >
+      <div
+        class="bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-xl transform transition-all"
+      >
+        <h2 class="text-2xl font-bold text-white mb-4">
+          Long-Term Study Planner
+        </h2>
+        <form id="study-planner-form" class="space-y-4">
+          <div>
+            <label class="block text-gray-300 mb-1 font-semibold">Subject</label>
+            <input type="text" id="planner-subject" class="w-full bg-gray-700 text-white rounded-lg p-2" placeholder="e.g. Maths" required />
+          </div>
+          <div>
+            <label class="block text-gray-300 mb-1 font-semibold">Main Topic</label>
+            <input type="text" id="planner-main-topic" class="w-full bg-gray-700 text-white rounded-lg p-2" placeholder="e.g. Calculus" required />
+          </div>
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label class="block text-gray-300 mb-1 font-semibold">Start Date</label>
+              <input type="date" id="planner-start-date" class="w-full bg-gray-700 text-white rounded-lg p-2" required />
+            </div>
+            <div class="flex-1">
+              <label class="block text-gray-300 mb-1 font-semibold">End Date</label>
+              <input type="date" id="planner-end-date" class="w-full bg-gray-700 text-white rounded-lg p-2" required />
+            </div>
+          </div>
+          <div>
+            <label class="block text-gray-300 mb-1 font-semibold">(Optional) Pre-load Sub-Topics (one per line, with optional target date: sub-topic | yyyy-mm-dd)</label>
+            <textarea id="planner-user-subtopics" class="w-full bg-gray-700 text-white rounded-lg p-2 h-20" placeholder="Limits | 2025-08-01\nDerivatives | 2025-08-03\nIntegrals"></textarea>
+          </div>
+          <div class="flex justify-end gap-4 mt-6">
+            <button type="button" id="close-study-planner-btn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg">Cancel</button>
+            <button type="submit" class="bg-purple-700 hover:bg-purple-800 text-white font-bold py-2 px-4 rounded-lg">Save Goal</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Firebase and App Scripts -->
+    <script type="module" src="script.js"></script>
+    <script>
+      // Register service worker for PWA
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+          navigator.serviceWorker.register("service-worker.js").then(
+            function (registration) {
+              console.log(
+                "ServiceWorker registration successful with scope: ",
+                registration.scope
+              );
+            },
+            function (err) {
+              console.log("ServiceWorker registration failed: ", err);
+            }
+          );
+        });
+      }
+    </script>
+  </body>
+</html>
